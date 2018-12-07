@@ -1,8 +1,9 @@
-## This is an R file to create a working dictionary for the twitteR project
-## It currently holds learning words and hashtags, but I would like to expand it to emojis
-
+##################################################
+## This is an R file to create a working         #
+## dictionary for the twitteR project.           #
+##################################################
 dict <- list()
-dict$LW <- c("professor", "lecture", "syllabus")
+dict$LW <- c("unlv", "UNLV")
 
 dict$LHash <- c("FFS", "FTW", "FTL", "FML", "LMAO", "LOL", "OMFG", "OMG", "STFU", "TMI", 
                       "WTF", "IMO", "FWIW", "IMHO", "BTW", "WTH")
@@ -15,8 +16,8 @@ dict$LHash <- sapply(dict$LHash, tolower)
 
 ##Open Emoji R dictionary
 tmp <- tempfile()
-download.file("https://raw.githubusercontent.com/today-is-a-good-day/Emoticons/master/emDict.csv",
+emDict <- download.file("https://unicode.org/emoji/charts/full-emoji-list.html",
                         destfile = tmp, method = "curl")
-emDict <- read.csv(tmp, sep = ";")
+# emDict <- read.csv(tmp, sep = ";")
 
 remove(tmp)                   
