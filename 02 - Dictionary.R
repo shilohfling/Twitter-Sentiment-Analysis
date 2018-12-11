@@ -5,8 +5,9 @@
 dict <- list()
 dict$LW <- c("unlv", "UNLV")
 
-dict$LHash <- c("FFS", "FTW", "FTL", "FML", "LMAO", "LOL", "OMFG", "OMG", "STFU", "TMI", 
-                      "WTF", "IMO", "FWIW", "IMHO", "BTW", "WTH")
+dict$LHash <- c("FFS", "FTW", "FTL", "FML", "LMAO", 
+                "LOL", "OMFG", "OMG", "STFU", "TMI",
+                "WTF", "IMO", "FWIW", "IMHO", "BTW", "WTH")
 dict$LHash <- sapply(dict$LHash, tolower)
 
 # dict$trends <- c("kyrie", "irving", "duke", "earth", "flat", "astronomy")

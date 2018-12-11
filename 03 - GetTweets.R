@@ -14,36 +14,33 @@ source("02 - Dictionary.R")
 
 ## Make connection and get data -----
 myTwitter$login()
-dataFrame <- myTwitter$getAll(dict$LW, dict$LHash, max = 10)
+dataFrame <- myTwitter$getAll(dict$LW, dict$LHash)
 dataFrame_backup <- dataFrame 
 
 dataFrame <- myTwitter$excludeUsers(dataFrame, dict)
-##TODO: Remove Identical rows
 dataFrame <- unique(dataFrame)
-##TODO: Feed row names back in as factor
 
-##Remove the tweets by users with dictionaries in their name using grep
-
+##Remove the tweets by users with dictionaries in their name using grep -----
 dataFrame <- myTwitter$removeUsername(dataFrame)
 dataFrame <- myTwitter$removeTweetID(dataFrame)
-dataFrame_backup <- dataFrame #Have a back up dataFrame in case something goes wrong
+dataFrame_backup <- dataFrame 
 
 dataFrame <- myTwitter$removeRTs(dataFrame)
 dataFrame <- myTwitter$convertEmojis(dataFrame)
 dataFrame <- myTwitter$findNReplace(dataFrame, emDict)
 dataFrame_backup <- dataFrame
 
-# results <- myTwitter$getSentiment(dataFrame, mykey)
+results <- myTwitter$getSentiment(dataFrame, key)
 dataFrame <- results[[1]]
 words <- results[[2]]
 
-# myPlot <- myTwitter$getPlot(dataFrame)
-# myPlot
+myPlot <- myTwitter$getPlot(dataFrame)
+myPlot
 
-# freq <- myTwitter$freqTable(dataFrame)
-# freq <- data.frame(words = names(freq), freq)
-# words <- left_join(words, freq)
-# 
+freq <- myTwitter$freqTable(dataFrame)
+freq <- data.frame(words = names(freq), freq)
+words <- left_join(words, freq)
+
 # remove(freq, results)
 # remove(access_secret, access_token, consumer_key, consumer_secret, mykey, path)
 # remove(dict, emDict)

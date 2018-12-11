@@ -29,7 +29,7 @@ myTwitter$getSome <- function(termA, termB, numA = 1, numB = 1, max = max) {
 }
 
 ## Get max number of tweets -----
-myTwitter$getAll <- function(termA, termB, max = 100) {
+myTwitter$getAll <- function(termA, termB, max = 500) {
   a <- 0
   myTweetData <- list()                              
   for (x in termA) {         
