@@ -36,11 +36,14 @@ words <- results[[2]]
 
 myPlot <- myTwitter$getPlot(dataFrame)
 myPlot
+ggsave(paste0("Rplot - ",Sys.Date(),".jpg"), myPlot, width = 8, height = 4)
 
 freq <- myTwitter$freqTable(dataFrame)
 freq <- data.frame(words = names(freq), freq)
 words <- left_join(words, freq)
 
+
+write.csv(dataFrame, paste0("data - ",Sys.Date(),".csv"))
 # remove(freq, results)
 # remove(access_secret, access_token, consumer_key, consumer_secret, mykey, path)
 # remove(dict, emDict)
