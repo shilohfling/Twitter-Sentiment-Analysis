@@ -166,7 +166,8 @@ myTwitter$getSentiment <- function(df, key) {
 ## Makes a GGPlot of how negative and positive the words are per the twinword API -----
 myTwitter$getPlot <- function(df)  {
   sentPlot <- ggplot(dataFrame, aes(x = created, y = sentScore, fill = sentType)) + 
-    geom_point(aes(colour = sentType)) 
+    geom_point(aes(colour = sentType)) +
+    expand_limits(y = c(-1.0, 1.0)) 
     
   return(sentPlot)
 }

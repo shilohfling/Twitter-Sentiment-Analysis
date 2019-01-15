@@ -27,7 +27,7 @@ dataFrame_backup <- dataFrame
 
 dataFrame <- myTwitter$removeRTs(dataFrame)
 dataFrame <- myTwitter$convertEmojis(dataFrame)
-dataFrame <- myTwitter$findNReplace(dataFrame, emDict)
+# dataFrame <- myTwitter$findNReplace(dataFrame, emDict)
 dataFrame_backup <- dataFrame
 
 results <- myTwitter$getSentiment(dataFrame, key)
