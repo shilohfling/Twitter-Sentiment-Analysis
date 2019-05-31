@@ -18,7 +18,7 @@ myTwitter$login <- function(ck = consumer_key, cs = consumer_secret, at = access
   setup_twitter_oauth(ck, cs, at, as)
 }
 
-myTwitter$getSome <- function(termA, termB, numA = 1, numB = 1, max = max) {
+myTwitter$getSomeWithHash <- function(termA, termB, numA = 1, numB = 1, max = max) {
   searchString <- paste(termA[numA], " +", termB[numB], sep="")
   print(searchString)
   results <- searchTwitter(searchString, max)
@@ -28,8 +28,18 @@ myTwitter$getSome <- function(termA, termB, numA = 1, numB = 1, max = max) {
   }
 }
 
+myTwitter$getSomeWOHash <- function(term, num = 1, max = max) {
+  searchString <- paste(term[num], sep="")
+  print(searchString)
+  results <- searchTwitter(searchString, max)
+  if (length(results) >= 1) {       
+    df <- twListToDF(results)       
+    return(df)                      
+  }
+}
+
 ## Get max number of tweets -----
-myTwitter$getAll <- function(termA, termB, max = 500) {
+myTwitter$getAllWithHash <- function(termA, termB, max = 500) {
   a <- 0
   myTweetData <- list()                              
   for (x in termA) {         
@@ -39,10 +49,23 @@ myTwitter$getAll <- function(termA, termB, max = 500) {
       b <- b + 1 
       item <- paste(x, "_", y, sep = "")
       #print(item)
-      df <- myTwitter$getSome(termA, termB, numA = a, numB = b, max = max)    
+      df <- myTwitter$getSomeWithHash(termA, termB, numA = a, numB = b, max = max)    
       myTweetData[[item]] <- df                     
     }                               
   }
+  myTweetDataDF <- do.call(rbind, myTweetData)
+  return(myTweetDataDF)
+}
+
+myTwitter$getAllWOHash <- function(term, max = 10000) {
+  a <- 0
+  myTweetData <- list()                              
+  for (x in term) {         
+    a <- a + 1
+      item <- x
+      df <- myTwitter$getSomeWOHash(term, num = a, max = max)    
+      myTweetData[[item]] <- df                     
+    }                               
   myTweetDataDF <- do.call(rbind, myTweetData)
   return(myTweetDataDF)
 }
@@ -77,7 +100,7 @@ myTwitter$findNReplace <- function(df, emDict, dfcol = "ASCII", dictcol = "Code"
   for (a in emDict[,dictcol]) {
   n <- n + 1
     nn <- 0
-    # emDict$Freq[n] <- length(which(c(grepl(a, df[,dfcol]) == TRUE)))
+    emDict$Freq[n] <- length(which(c(grepl(a, df[,dfcol]) == TRUE)))
     print(length(which(c(grepl(a, df[,dfcol]) == TRUE))))
     for (b in df[,dfcol]) {
       nn <- nn + 1
@@ -98,12 +121,12 @@ myTwitter$freqTable <- function(df, textvec = "ASCII") {
     Qcorp <- tm_map(Qcorp, content_transformer(tolower))
     Qcorp <- tm_map(Qcorp, removePunctuation)
     Qcorp <- tm_map(Qcorp, PlainTextDocument)
-    Qcorp <- tm_map(Qcorp, removeWords, c(stopwords("english"), dictStopWords)) 
+    Qcorp <- tm_map(Qcorp, removeWords, c(stopwords("english"), dictStopWords))
     #Qcorp <- tm_map(Qcorp, stemDocument)
     Qcorp <- tm_map(Qcorp, stripWhitespace)
-    Qdtm <- DocumentTermMatrix(Qcorp) 
-    Qfreq <- colSums(as.matrix(Qdtm)) 
-    Qord <- order(Qfreq) 
+    Qdtm <- DocumentTermMatrix(Qcorp)
+    Qfreq <- colSums(as.matrix(Qdtm))
+    Qord <- order(Qfreq)
     Qfreq <- Qfreq[Qord]
   return(Qfreq)
 }
@@ -145,7 +168,7 @@ myTwitter$getSentiment <- function(df, key) {
     response <- POST(build_url(url), add_headers(headers),         
                      content_type("application/x-www-form-urlencoded"),   
                      accept_json())
-    #response <<- response
+
     content <- content(response, "parsed")
     
     print(paste(n, content$result_msg, sep = " "))
@@ -166,7 +189,7 @@ myTwitter$getSentiment <- function(df, key) {
 ## Makes a GGPlot of how negative and positive the words are per the twinword API -----
 myTwitter$getPlot <- function(df)  {
   sentPlot <- ggplot(dataFrame, aes(x = created, y = sentScore, fill = sentType)) + 
-    geom_point(aes(colour = sentType)) +
+    geom_jitter(aes(colour = sentType)) +
     expand_limits(y = c(-1.0, 1.0)) 
     
   return(sentPlot)
