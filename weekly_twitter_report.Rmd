@@ -1,0 +1,163 @@
+---
+title: "Twitter Topics of the Week"
+author: 
+- "Office of Decision Support"
+- "University of Nevada, Las Vegas"
+header-includes:
+- \usepackage[utf8]{inputenc}
+- \usepackage[T1]{fontenc}
+- \usepackage{textcomp}
+- \usepackage{float}
+date: "`r format(Sys.Date(),'%B %d, %Y')`"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+```{r setup, include = FALSE}
+setwd("~/Documents/GitHub/Twitter-Sentiment-Analysis/")
+
+library(tidyr)
+library(dplyr)
+library(xtable)
+library(tm)
+library(tidytext)
+library(ggplot2)
+
+source("02 - Dictionary.R")
+```
+
+```{r Clean Up Data, echo = FALSE, warning = FALSE, message = FALSE}
+df <- read.csv(paste0("data - ",Sys.Date(),".csv"), stringsAsFactors = FALSE)
+
+df <- df %>%
+      # separate(X, c("word", "hash"), "_") %>%
+      # separate(hash, c("hash", "num"), "[.]") %>%
+      separate(X, c("word", "num"), "[.]") %>%
+      select(-num) %>%
+      filter(word != "University of Nevada")
+
+data("stop_words")
+custom_stop_words <- data.frame(word = c("i’m", "bc", "https", "t.co", "im", "don’t", 1:999,
+                                         "barstool__unlv", "rt", "unlv",
+                                         "charliekirk11", "donaldtrumpjr", "kimguilfoyle", "drew", "realcan",
+                                         "las", "vegas", "amp", "2019", 
+                                         dict$LW, dict$LHash))
+```
+
+```{r, echo = FALSE, message = FALSE, results = 'asis'}
+avg_score <- round(mean(df$sentScore), 2)
+```
+There were `r nrow(df) ` total tweets containing 'UNLV' this week.
+Average sentiment score of the week was `r avg_score`.
+
+```{r Sentiment Frequencies, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+df %>% 
+  group_by(sentType) %>% 
+  summarise(Total = n()) %>%
+ggplot(aes(x = sentType, y = Total, fill = sentType)) +
+  geom_col(stat = "identity") +
+  geom_text(aes(label = Total,
+                y = Total + 5))
+```            
+
+```{r echo = FALSE}
+ggplot(df, aes(x = created, y = sentScore, fill = sentType)) + 
+    geom_jitter(aes(colour = sentType)) +
+    expand_limits(y = c(-1.0, 1.0)) 
+```
+
+\section{Most Frequently Used Words}
+```{r Most Frequently Used Words, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+tweet_corpus <- Corpus(VectorSource(as.vector(df$text))) 
+tidy_tweets <- df %>%
+  select(created, text) %>%
+  unnest_tokens("word", text)
+
+freq_words <- tidy_tweets %>%
+              anti_join(stop_words) %>%
+              anti_join(custom_stop_words) %>% 
+              count(word) %>%
+              arrange(desc(n)) %>%
+              head(n = 10)
+
+print(xtable(freq_words,
+             align = c("l", "p{5cm}", rep("p{2.25cm}", ncol(freq_words)-1))),
+      table.placement = "H",
+      include.rownames = TRUE,
+      comment = FALSE)
+```
+
+\newpage
+\section{Most Retweeted of the Week}
+```{r Most Retweets, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+retweets <- df %>%
+     filter(retweetCount > 0) %>%
+     filter(isRetweet == FALSE) %>%
+     filter(is.na(replyToSN)) %>%
+     arrange(desc(retweetCount)) %>%
+     select(text, retweetCount, favoriteCount, sentType, sentScore) %>%
+     head(n = 10)
+
+print(xtable(retweets,
+             align = c("l", "p{7cm}", rep("p{1.75cm}", ncol(retweets)-1))),        
+      table.placement = "H",
+      include.rownames = TRUE,
+      hline.after = c(-1:rep(nrow(retweets))),
+      comment = FALSE)
+```
+
+\newpage
+\section{Most Favorited of the Week}
+```{r Most Favorites, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+favorites <- df %>%
+     filter(favoriteCount > 0) %>%
+     filter(isRetweet == FALSE) %>%
+     filter(is.na(replyToSN)) %>%
+     arrange(desc(favoriteCount)) %>%
+     select(text, retweetCount, favoriteCount, sentType, sentScore) %>%
+     head(n = 10)
+
+print(xtable(favorites,
+             align = c("l", "p{7cm}", rep("p{1.75cm}", ncol(favorites)-1))),
+      table.placement = "H",
+      include.rownames = TRUE,
+      hline.after = c(-1:rep(nrow(favorites))),
+      comment = FALSE)
+```
+
+\newpage
+\section{Most Negative of the Week}
+```{r Most Negative, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+negatives <- df %>%
+     filter(isRetweet == FALSE) %>%
+     filter(is.na(replyToSN)) %>%
+     arrange(sentScore) %>%
+     select(text, retweetCount, favoriteCount, sentType, sentScore) %>%
+     head(n = 10)
+
+print(xtable(negatives,
+             align = c("l", "p{7cm}", rep("p{1.75cm}", ncol(negatives)-1))),
+      table.placement = "H",
+      include.rownames = TRUE,
+      hline.after = c(-1:rep(nrow(negatives))),
+      comment = FALSE)
+```
+
+\newpage
+\section{Most Positive of the Week}
+```{r Most Positive, echo = FALSE, warning = FALSE, message = FALSE, results = 'asis'}
+positives <- df %>%
+     filter(isRetweet == FALSE) %>%
+     filter(is.na(replyToSN)) %>%
+     arrange(desc(sentScore)) %>%
+     select(text, retweetCount, favoriteCount, sentType, sentScore) %>%
+     head(n = 10)
+
+print(xtable(positives,
+             align = c("l", "p{7cm}", rep("p{1.75cm}", ncol(positives)-1))),
+      table.placement = "H",
+      include.rownames = TRUE,
+      hline.after = c(-1:rep(nrow(positives))),
+      comment = FALSE)
+```
