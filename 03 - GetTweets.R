@@ -3,6 +3,9 @@
 ## to get tweets from twitter and analyze them.  #
 ##################################################
 
+## Load packages -----
+library(openxlsx)
+
 ## Set working directory -----
 setwd("~/Documents/GitHub/Twitter-Sentiment-Analysis/")
 
@@ -25,16 +28,8 @@ words <- results[[2]]
 
 myPlot <- myTwitter$getPlot(dataFrame)
 myPlot
-# ggsave(paste0("Rplot - ",Sys.Date(),".jpg"), myPlot, width = 8, height = 4)
 
 
 ## Export -----
-write.csv(dataFrame, paste0("data - ",Sys.Date(),".csv"))
-
-remove(results)
-remove(access_secret, access_token, consumer_key, consumer_secret, mykey, path)
-remove(dict)
-remove(dataFrame_backup)
-
-# head(as.data.frame(dataFrame))
+write.xlsx(dataFrame, paste0("data_",Sys.Date(),".xlsx"))
 
